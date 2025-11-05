@@ -1,0 +1,270 @@
+---
+title: "Contributing"
+description: "How to contribute to the Snakemake Wrappers project"
+---
+
+## Welcome!
+
+Thank you for your interest in contributing to Snakemake Wrappers! This project thrives on community contributions.
+
+## Ways to contribute
+
+<Columns cols={2}>
+  <Card
+    title="Add new wrappers"
+    icon="plus-circle"
+  >
+    Create wrappers for tools that aren't yet covered
+  </Card>
+  <Card
+    title="Improve existing wrappers"
+    icon="wrench"
+  >
+    Fix bugs, add features, or improve documentation
+  </Card>
+  <Card
+    title="Report issues"
+    icon="bug"
+  >
+    Help identify problems with wrappers
+  </Card>
+  <Card
+    title="Improve documentation"
+    icon="book"
+  >
+    Enhance guides and examples
+  </Card>
+</Columns>
+
+## Getting started
+
+### Prerequisites
+
+Before contributing, ensure you have:
+
+- Git installed
+- Python 3.7+ installed
+- Conda or Mamba installed (for testing)
+- Basic knowledge of Snakemake
+
+### Setting up your development environment
+
+<Steps>
+  <Step title="Fork and clone">
+    Fork the repository on GitHub, then clone your fork:
+    
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/snakemake-wrappers.git
+    cd snakemake-wrappers
+    ```
+  </Step>
+  
+  <Step title="Add upstream remote">
+    Add the upstream repository:
+    
+    ```bash
+    git remote add upstream https://github.com/snakemake/snakemake-wrappers.git
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    Install testing dependencies:
+    
+    ```bash
+    pip install pytest pytest-cov
+    ```
+  </Step>
+  
+  <Step title="Create a branch">
+    Create a branch for your contribution:
+    
+    ```bash
+    git checkout -b your-feature-name
+    ```
+  </Step>
+</Steps>
+
+## Contribution guidelines
+
+### Code style
+
+- Follow PEP 8 for Python code
+- Use meaningful variable names
+- Add comments for complex logic
+- Keep functions focused and small
+
+### Documentation
+
+- Update `meta.yaml` with accurate descriptions
+- Include examples in test Snakefiles
+- Document all parameters clearly
+- Add docstrings to wrapper functions
+
+### Testing
+
+- All wrappers must include tests
+- Tests should verify both success and failure cases
+- Ensure tests run with `--use-conda`
+- Test with realistic data
+
+### Commit messages
+
+Write clear, descriptive commit messages:
+
+```
+Good: "Add support for --threads parameter in bwa-mem wrapper"
+Bad: "Fix stuff"
+```
+
+## Submitting changes
+
+<Steps>
+  <Step title="Test your changes">
+    Run the test suite:
+    
+    ```bash
+    pytest test_wrappers.py -v
+    ```
+    
+    Or test a specific wrapper:
+    
+    ```bash
+    pytest test_wrappers.py::test_toolname -v
+    ```
+  </Step>
+  
+  <Step title="Check code style">
+    Ensure your code follows style guidelines. Consider using tools like:
+    
+    ```bash
+    black wrapper.py  # Format code
+    flake8 wrapper.py  # Check style
+    ```
+  </Step>
+  
+  <Step title="Update documentation">
+    If adding a new wrapper, ensure all documentation is complete:
+    - `meta.yaml` is filled out
+    - Test Snakefile includes examples
+    - Parameters are documented
+  </Step>
+  
+  <Step title="Commit your changes">
+    Commit with a clear message:
+    
+    ```bash
+    git add .
+    git commit -m "Add wrapper for toolname"
+    ```
+  </Step>
+  
+  <Step title="Push and create PR">
+    Push to your fork and create a pull request:
+    
+    ```bash
+    git push origin your-feature-name
+    ```
+    
+    Then open a pull request on GitHub.
+  </Step>
+</Steps>
+
+## Pull request process
+
+### Before submitting
+
+<Check>
+- [ ] All tests pass
+- [ ] Code follows style guidelines
+- [ ] Documentation is updated
+- [ ] Commit messages are clear
+- [ ] Branch is up to date with upstream
+</Check>
+
+### During review
+
+- Respond to feedback promptly
+- Make requested changes
+- Keep discussions focused and constructive
+- Be patient - reviews take time
+
+### After approval
+
+- Maintainers will merge your PR
+- Your contribution will be included in the next release
+- You'll be credited in the repository
+
+## Reporting issues
+
+### Bug reports
+
+When reporting bugs, include:
+
+- **Description**: Clear description of the issue
+- **Reproduction**: Steps to reproduce the problem
+- **Expected behavior**: What should happen
+- **Actual behavior**: What actually happens
+- **Environment**: Snakemake version, OS, Python version
+- **Wrapper**: Which wrapper is affected
+
+### Feature requests
+
+When requesting features, describe:
+
+- **Use case**: Why is this feature needed?
+- **Proposed solution**: How should it work?
+- **Alternatives**: Other approaches considered
+
+## Code of conduct
+
+We are committed to providing a welcoming and inclusive environment. All contributors are expected to:
+
+- Be respectful and considerate
+- Welcome newcomers and help them learn
+- Focus on constructive feedback
+- Respect different viewpoints and experiences
+
+## Recognition
+
+Contributors are recognized in:
+
+- The repository's contributors list
+- Release notes for significant contributions
+- The project's documentation
+
+<Card
+  title="View contributors"
+  icon="users"
+  href="https://github.com/snakemake/snakemake-wrappers/graphs/contributors"
+>
+  See all contributors to the project
+</Card>
+
+## Getting help
+
+If you need help contributing:
+
+- Check existing documentation
+- Look at similar wrappers for examples
+- Ask questions in GitHub discussions
+- Review open pull requests for patterns
+
+<CardGroup cols={2}>
+  <Card
+    title="GitHub Discussions"
+    icon="comments"
+    href="https://github.com/snakemake/snakemake-wrappers/discussions"
+  >
+    Ask questions and share ideas
+  </Card>
+  <Card
+    title="Issues"
+    icon="exclamation-circle"
+    href="https://github.com/snakemake/snakemake-wrappers/issues"
+  >
+    Report bugs and request features
+  </Card>
+</CardGroup>
+
+Thank you for contributing to Snakemake Wrappers! 🎉
+

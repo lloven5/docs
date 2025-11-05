@@ -1,97 +1,111 @@
 ---
-title: "Introduction!"
-description: "Welcome to the new home for your documentation"
+title: "Snakemake Wrappers"
+description: "A collection of reusable wrappers for popular bioinformatics tools in Snakemake workflows"
 ---
 
-## Setting up
-
-Get your documentation site up and running in minutes.
-
 <Card
-  title="Start here"
+  title="Get Started"
   icon="rocket"
   href="/quickstart"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Learn how to use wrappers in your Snakemake workflows in minutes.
 </Card>
 
-## Make it yours
+## What are Snakemake Wrappers?
 
-Design a docs site that looks great and empowers your users.
+The Snakemake Wrapper Repository is a collection of reusable wrappers that allow you to quickly use popular command line tools from [Snakemake](https://snakemake.readthedocs.io) rules and workflows.
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+<Info>
+Each wrapper provides a standardized interface to bioinformatics tools, handling input/output parsing, parameter management, and integration with Snakemake's resource management.
+</Info>
 
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
+## Why use wrappers?
 
 <Columns cols={2}>
   <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
+    title="Easy to use"
+    icon="check-circle"
   >
-    Use MDX to style your docs pages.
+    Use tools with a simple, consistent interface across your workflows.
   </Card>
   <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
+    title="Well tested"
+    icon="flask"
   >
-    Add sample code to demonstrate how to use your product.
+    All wrappers are tested to ensure reliability and correctness.
   </Card>
   <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
+    title="Automatic environments"
+    icon="gear"
   >
-    Display images and other media.
+    Conda environments are automatically managed for each tool.
   </Card>
   <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
+    title="Resource management"
+    icon="microchip"
   >
-    Write once and reuse across your docs.
+    Integrates seamlessly with Snakemake's resource allocation.
   </Card>
 </Columns>
 
-## Need inspiration?
+## Quick example
+
+Here's a simple example using the FastQC wrapper:
+
+```python
+rule fastqc:
+    input:
+        "reads/{sample}.fastq",
+    output:
+        html="qc/fastqc/{sample}.html",
+        zip="qc/fastqc/{sample}_fastqc.zip",
+    params:
+        extra="--quiet",
+    log:
+        "logs/fastqc/{sample}.log",
+    threads: 1
+    resources:
+        mem_mb = 1024,
+    wrapper:
+        "master/bio/fastqc"
+```
+
+## Available wrappers
+
+We provide wrappers for hundreds of bioinformatics tools, including:
+
+- **Alignment**: BWA, Bowtie2, STAR, HISAT2, Minimap2
+- **Variant calling**: GATK, FreeBayes, VarScan, Strelka
+- **Quality control**: FastQC, MultiQC, Qualimap
+- **RNA-seq**: Salmon, Kallisto, RSEM, STAR
+- **Assembly**: SPAdes, MEGAHIT, Canu
+- **And many more...**
 
 <Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
+  title="Browse all wrappers"
+  icon="list"
+  href="/wrappers"
 >
-  Browse our showcase of exceptional documentation sites.
+  See the complete list of available wrappers
 </Card>
+
+## Getting help
+
+<CardGroup cols={2}>
+  <Card
+    title="Documentation"
+    icon="book"
+    href="https://snakemake.readthedocs.io"
+  >
+    Read the Snakemake documentation
+  </Card>
+  <Card
+    title="Community"
+    icon="users"
+    href="https://github.com/snakemake/snakemake-wrappers"
+  >
+    Join the community on GitHub
+  </Card>
+</CardGroup>
+

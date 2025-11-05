@@ -1,93 +1,371 @@
 ---
 title: "Development"
-description: "Preview changes locally to update your docs"
+description: "Set up your development environment for working with Snakemake Wrappers"
 ---
 
-<Info>
-  **Prereqisites**:
+## Prerequisites
 
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
-</Info>
+Before you can develop or test wrappers locally, you need:
 
-Follow these steps to install and run Mintlify on your operating system.
+- Python 3.7 or higher
+- Conda or Mamba
+- Git
+- Snakemake ≥5.7.0
+
+## Setting up the development environment
 
 <Steps>
-  <Step title="Install the Mintlify CLI">
+  <Step title="Clone the repository">
+    Clone the repository to your local machine:
+    
     ```bash
-    npm i -g mint
+    git clone https://github.com/snakemake/snakemake-wrappers.git
+    cd snakemake-wrappers
+    ```
+    
+    Or if you've forked the repository:
+    
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/snakemake-wrappers.git
+    cd snakemake-wrappers
     ```
   </Step>
-  <Step title="Preview locally">
-    Navigate to your docs directory where your `docs.json` file is located, and run the following command:
-
+  
+  <Step title="Install dependencies">
+    Install the required Python packages:
+    
     ```bash
-    mint dev
+    pip install pytest pytest-cov pyyaml
     ```
-
-    A local preview of your documentation will be available at `http://localhost:3000`.
+    
+    Or use conda:
+    
+    ```bash
+    conda install pytest pytest-cov pyyaml
+    ```
+  </Step>
+  
+  <Step title="Install Snakemake">
+    Make sure you have Snakemake installed:
+    
+    ```bash
+    conda install -c bioconda -c conda-forge snakemake
+    ```
+    
+    Or:
+    
+    ```bash
+    pip install snakemake
+    ```
   </Step>
 </Steps>
 
-## Custom ports
+## Testing wrappers
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+### Running all tests
 
-```bash
-mint dev --port 3333
-```
-
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+Run the complete test suite:
 
 ```bash
-npm mint update
+pytest test_wrappers.py -v
 ```
 
-## Validating links
+### Testing a specific wrapper
 
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
+Test a single wrapper:
 
 ```bash
-mint broken-links
+pytest test_wrappers.py::test_fastqc -v
 ```
 
-## Deployment
+### Testing with specific options
 
-If the deployment is successful, you should see the following:
+Run tests with additional options:
 
-<Frame>
-  <img
-    src="/images/checks-passed.png"
-    alt="Screenshot of a deployment confirmation message that says All checks have passed."
-    style={{ borderRadius:"0.5rem" }}
-  />
-</Frame>
+```bash
+# Show print statements
+pytest test_wrappers.py -v -s
 
-## Code formatting
+# Stop on first failure
+pytest test_wrappers.py -v -x
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+# Run tests in parallel
+pytest test_wrappers.py -v -n auto
+```
+
+### Testing modified wrappers only
+
+If you've modified wrappers, you can test only changed ones:
+
+```bash
+# Test wrappers changed compared to master
+DIFF_MASTER=true pytest test_wrappers.py -v
+
+# Test wrappers changed in last commit
+DIFF_LAST_COMMIT=true pytest test_wrappers.py -v
+```
+
+### Containerized testing
+
+Run tests in containers:
+
+```bash
+CONTAINERIZED=true pytest test_wrappers.py -v
+```
+
+## Creating test workflows
+
+### Test structure
+
+Each wrapper should have a test directory:
+
+```
+bio/toolname/
+├── wrapper.py
+├── meta.yaml
+├── environment.yaml
+└── test/
+    ├── Snakefile
+    └── data/
+        └── test_input.txt
+```
+
+### Test Snakefile
+
+Your test Snakefile should:
+
+1. Use the wrapper
+2. Include realistic test data
+3. Verify outputs are produced
+4. Test common use cases
+
+Example:
+
+```python
+rule test_tool:
+    input:
+        "test/data/input.txt",
+    output:
+        "test/output.txt",
+    params:
+        extra="--flag value",
+    log:
+        "test/logs/tool.log",
+    wrapper:
+        "master/bio/toolname"
+
+rule all:
+    input:
+        "test/output.txt"
+```
+
+## Local wrapper development
+
+### Testing wrappers locally
+
+When developing a wrapper, you can test it locally:
+
+```python
+# In your Snakefile
+rule test:
+    input:
+        "input.txt",
+    output:
+        "output.txt",
+    wrapper:
+        "../bio/toolname"  # Relative path to your wrapper
+```
+
+### Using local wrapper repository
+
+To use a local wrapper repository in your workflow:
+
+```python
+rule example:
+    wrapper:
+        "file:///path/to/snakemake-wrappers/bio/toolname"
+```
+
+Or set the wrapper base directory:
+
+```bash
+snakemake --wrapper-prefix file:///path/to/snakemake-wrappers
+```
+
+## Debugging
+
+### Enable verbose logging
+
+Get more detailed output:
+
+```bash
+snakemake --verbose
+```
+
+### Check wrapper execution
+
+Add debug prints to your wrapper:
+
+```python
+import sys
+print(f"Input: {snakemake.input}", file=sys.stderr)
+print(f"Output: {snakemake.output}", file=sys.stderr)
+```
+
+### Test wrapper manually
+
+Run the wrapper's command directly:
+
+```bash
+# Activate the conda environment
+conda activate snakemake-wrappers-env
+
+# Run the tool manually
+toolname --input test.txt --output result.txt
+```
+
+## Code quality
+
+### Formatting
+
+Use code formatters:
+
+```bash
+# Format Python code
+black wrapper.py
+
+# Check style
+flake8 wrapper.py
+```
+
+### Linting
+
+Check for common issues:
+
+```bash
+# Python linting
+pylint wrapper.py
+
+# YAML validation
+yamllint meta.yaml environment.yaml
+```
+
+## Building documentation
+
+### Preview documentation locally
+
+If the documentation uses Mintlify:
+
+```bash
+cd docs
+npm install -g mint
+mint dev
+```
+
+### Validate YAML files
+
+Check that all YAML files are valid:
+
+```bash
+python -c "import yaml; yaml.safe_load(open('meta.yaml'))"
+```
+
+## Continuous integration
+
+### GitHub Actions
+
+The repository uses GitHub Actions for:
+
+- Running tests on pull requests
+- Validating wrapper syntax
+- Checking code style
+- Testing on multiple Python versions
+
+### Pre-commit hooks
+
+Consider setting up pre-commit hooks:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
 
 ## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-    This may be due to an outdated version of node. Try the following:
-
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
+  <Accordion title="Tests fail with conda errors">
+    **Problem**: Conda environment creation fails during tests.
+    
+    **Solution**:
+    - Clear conda cache: `conda clean --all`
+    - Update conda: `conda update conda`
+    - Check network connectivity
+    - Verify conda channels are accessible
   </Accordion>
-  <Accordion title="Issue: Encountering an unknown error">
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
+  
+  <Accordion title="Wrapper not found">
+    **Problem**: Snakemake can't find your wrapper.
+    
+    **Solution**:
+    - Check the wrapper path is correct
+    - Ensure you're in the right directory
+    - Verify the wrapper directory structure
+    - Use absolute paths for testing
+  </Accordion>
+  
+  <Accordion title="Import errors">
+    **Problem**: Python import errors in wrapper.
+    
+    **Solution**:
+    - Check all imports are available in environment.yaml
+    - Verify import paths are correct
+    - Test imports in the conda environment
+  </Accordion>
+  
+  <Accordion title="Test data not found">
+    **Problem**: Tests can't find test data.
+    
+    **Solution**:
+    - Verify test data paths are relative to test directory
+    - Check test data files exist
+    - Ensure paths in Snakefile are correct
   </Accordion>
 </AccordionGroup>
 
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+## Best practices
+
+<Tip>
+**Test before committing**: Always run tests locally before pushing changes.
+</Tip>
+
+<Tip>
+**Use version control**: Commit frequently with clear messages.
+</Tip>
+
+<Tip>
+**Follow conventions**: Match the style and structure of existing wrappers.
+</Tip>
+
+<Tip>
+**Document changes**: Update documentation when modifying wrappers.
+</Tip>
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card
+    title="Snakemake Documentation"
+    icon="book"
+    href="https://snakemake.readthedocs.io"
+  >
+    Learn more about Snakemake workflows
+  </Card>
+  <Card
+    title="GitHub Repository"
+    icon="github"
+    href="https://github.com/snakemake/snakemake-wrappers"
+  >
+    View source code and issues
+  </Card>
+</CardGroup>
+

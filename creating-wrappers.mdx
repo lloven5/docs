@@ -1,0 +1,326 @@
+---
+title: "Creating Wrappers"
+description: "Guide to creating new wrappers for Snakemake workflows"
+---
+
+## Overview
+
+Creating a wrapper allows you to standardize tool usage across workflows and share it with the community. This guide walks you through the process of creating a new wrapper.
+
+## Wrapper structure
+
+Each wrapper consists of the following files:
+
+```
+bio/toolname/
+├── meta.yaml          # Metadata and documentation
+├── wrapper.py         # The wrapper implementation
+├── environment.yaml   # Conda environment definition
+└── test/              # Test files
+    ├── Snakefile      # Test workflow
+    └── data/          # Test data
+```
+
+## Step-by-step guide
+
+<Steps>
+  <Step title="Create wrapper directory">
+    Create a new directory under `bio/` with your tool name:
+    
+    ```bash
+    mkdir -p bio/toolname
+    cd bio/toolname
+    ```
+  </Step>
+  
+  <Step title="Create meta.yaml">
+    Create a `meta.yaml` file with tool metadata:
+    
+    ```yaml
+    name: toolname
+    description: |
+      Brief description of what the tool does.
+    url: https://github.com/tool/toolname
+    authors:
+      - Your Name
+    input:
+      - input file description
+    output:
+      - output1: description of first output
+      - output2: description of second output
+    params:
+      - param1: description of parameter
+    ```
+  </Step>
+  
+  <Step title="Create environment.yaml">
+    Define the conda environment with required dependencies:
+    
+    ```yaml
+    channels:
+      - bioconda
+      - conda-forge
+    dependencies:
+      - toolname=1.0.0
+      - snakemake-wrapper-utils
+    ```
+  </Step>
+  
+  <Step title="Implement wrapper.py">
+    Create the wrapper implementation:
+    
+    ```python
+    """Snakemake wrapper for toolname."""
+    
+    __author__ = "Your Name"
+    __copyright__ = "Copyright 2024, Your Name"
+    __email__ = "your.email@example.com"
+    __license__ = "MIT"
+    
+    from snakemake.shell import shell
+    
+    # Extract parameters
+    extra = snakemake.params.get("extra", "")
+    log = snakemake.log_fmt_shell(stdout=True, stderr=True)
+    
+    # Build command
+    shell(
+        "toolname"
+        " {extra}"
+        " {snakemake.input}"
+        " -o {snakemake.output}"
+        " {log}"
+    )
+    ```
+  </Step>
+  
+  <Step title="Create test files">
+    Create a test directory with a Snakefile and test data:
+    
+    ```python
+    # test/Snakefile
+    rule toolname:
+        input:
+            "data/input.txt",
+        output:
+            "output.txt",
+        params:
+            extra="--some-flag",
+        log:
+            "logs/toolname.log",
+        wrapper:
+            "master/bio/toolname"
+    ```
+  </Step>
+</Steps>
+
+## Wrapper implementation details
+
+### Input handling
+
+Handle single or multiple inputs:
+
+```python
+# Single input
+input_file = snakemake.input
+
+# Multiple inputs (list)
+input_files = snakemake.input
+
+# Named inputs (dict)
+reads = snakemake.input.reads
+reference = snakemake.input.reference
+```
+
+### Output handling
+
+Handle single or multiple outputs:
+
+```python
+# Single output
+output_file = snakemake.output
+
+# Multiple outputs (list)
+output_files = snakemake.output
+
+# Named outputs (dict)
+html = snakemake.output.html
+zip_file = snakemake.output.zip
+```
+
+### Parameter extraction
+
+Extract and validate parameters:
+
+```python
+# Get parameter with default
+extra = snakemake.params.get("extra", "")
+
+# Get required parameter
+required_param = snakemake.params.required_param
+
+# Validate parameter
+threads = snakemake.threads
+assert threads > 0, "threads must be > 0"
+```
+
+### Memory management
+
+Use the utility functions for memory handling:
+
+```python
+from snakemake_wrapper_utils.snakemake import get_mem
+
+# Get memory in different units
+mem_mb = get_mem(snakemake, "MiB")
+mem_gb = get_mem(snakemake, "GiB")
+```
+
+### Logging
+
+Always include logging:
+
+```python
+log = snakemake.log_fmt_shell(stdout=True, stderr=True)
+
+shell(
+    "command {log}"
+)
+```
+
+## Best practices
+
+### Error handling
+
+Validate inputs and parameters:
+
+```python
+# Check input files exist
+if not os.path.exists(snakemake.input):
+    raise ValueError(f"Input file not found: {snakemake.input}")
+
+# Validate parameters
+if snakemake.params.get("quality") < 0 or snakemake.params.get("quality") > 100:
+    raise ValueError("Quality must be between 0 and 100")
+```
+
+### Temporary files
+
+Use temporary directories for intermediate files:
+
+```python
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as tmpdir:
+    intermediate = os.path.join(tmpdir, "intermediate.txt")
+    shell("command -o {intermediate}")
+    shell("mv {intermediate} {snakemake.output}")
+```
+
+### Resource awareness
+
+Respect Snakemake's resource allocation:
+
+```python
+# Use threads from snakemake
+threads = snakemake.threads
+
+# Use memory from resources
+mem_mb = get_mem(snakemake, "MiB")
+```
+
+## Testing
+
+### Running tests
+
+Test your wrapper using pytest:
+
+```bash
+pytest test_wrappers.py::test_toolname -v
+```
+
+### Test structure
+
+Your test should:
+
+1. Create a temporary directory
+2. Set up test data
+3. Run the wrapper
+4. Verify outputs
+5. Clean up
+
+Example test file location:
+
+```
+bio/toolname/test/
+├── Snakefile
+└── data/
+    └── input.txt
+```
+
+## Submitting your wrapper
+
+<Steps>
+  <Step title="Fork the repository">
+    Fork the [snakemake-wrappers repository](https://github.com/snakemake/snakemake-wrappers) on GitHub.
+  </Step>
+  
+  <Step title="Create a branch">
+    Create a feature branch for your wrapper:
+    
+    ```bash
+    git checkout -b add-toolname-wrapper
+    ```
+  </Step>
+  
+  <Step title="Add your wrapper">
+    Add your wrapper files to the appropriate directory.
+  </Step>
+  
+  <Step title="Run tests">
+    Ensure all tests pass:
+    
+    ```bash
+    pytest test_wrappers.py -v
+    ```
+  </Step>
+  
+  <Step title="Submit a pull request">
+    Push your changes and create a pull request on GitHub.
+  </Step>
+</Steps>
+
+<Warning>
+Make sure your wrapper follows the existing code style and conventions. Review similar wrappers for consistency.
+</Warning>
+
+## Wrapper categories
+
+Wrappers are organized by category:
+
+- **bio/**: Bioinformatics tools
+- **geo/**: Geospatial tools
+- **meta/**: Metagenomics tools
+- **phys/**: Physics/chemistry tools
+
+Place your wrapper in the appropriate category directory.
+
+## Additional resources
+
+<CardGroup cols={2}>
+  <Card
+    title="Example wrappers"
+    icon="code"
+    href="https://github.com/snakemake/snakemake-wrappers/tree/master/bio"
+  >
+    Browse existing wrappers for examples
+  </Card>
+  <Card
+    title="Snakemake documentation"
+    icon="book"
+    href="https://snakemake.readthedocs.io"
+  >
+    Learn more about Snakemake workflows
+  </Card>
+</CardGroup>
+

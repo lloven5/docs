@@ -1,0 +1,175 @@
+---
+title: "Available Wrappers"
+description: "Complete list of available wrappers in the repository"
+---
+
+## Overview
+
+The Snakemake Wrappers repository contains wrappers for hundreds of bioinformatics tools, organized by category. This page provides an overview of available wrappers.
+
+<Info>
+For the most up-to-date list, visit the [GitHub repository](https://github.com/snakemake/snakemake-wrappers/tree/master/bio).
+</Info>
+
+## Categories
+
+### Alignment tools
+
+Wrappers for sequence alignment tools:
+
+- **BWA** - Burrows-Wheeler Aligner (index, mem, aln, samse, sampe)
+- **BWA-MEM2** - Fast and accurate alignment
+- **Bowtie2** - Ultrafast alignment
+- **STAR** - Spliced Transcripts Alignment
+- **HISAT2** - Hierarchical indexing for spliced alignment
+- **Minimap2** - Versatile alignment tool
+- **RazerS3** - Read mapping tool
+- **PALADIN** - Alignment tool
+- **PBMM2** - PacBio aligner
+
+### Variant calling
+
+Tools for variant detection and analysis:
+
+- **GATK** - Genome Analysis Toolkit (v3 and v4)
+- **FreeBayes** - Bayesian variant caller
+- **VarScan** - Variant detection
+- **Strelka** - Somatic variant caller
+- **Manta** - Structural variant caller
+- **Delly** - Structural variant detection
+- **LoFreq** - Sensitive variant caller
+- **VarDict** - Variant caller
+- **Varlociraptor** - Variant caller
+
+### Quality control
+
+Tools for quality assessment:
+
+- **FastQC** - Quality control for sequencing data
+- **MultiQC** - Aggregate results from multiple tools
+- **Qualimap** - Quality assessment
+- **RSeQC** - RNA-seq quality control
+- **FastQ Screen** - Screen for contamination
+- **Picard** - Quality metrics collection
+
+### RNA-seq analysis
+
+Tools for RNA sequencing workflows:
+
+- **Salmon** - Transcript quantification
+- **Kallisto** - Pseudoalignment for quantification
+- **RSEM** - RNA-Seq by Expectation Maximization
+- **tximport** - Import transcript-level estimates
+- **DESeq2** - Differential expression analysis
+- **EdgeR** - Differential expression
+
+### Preprocessing
+
+Tools for read preprocessing:
+
+- **Trimmomatic** - Read trimming
+- **Trim Galore** - Quality and adapter trimming
+- **Cutadapt** - Adapter removal
+- **FastP** - All-in-one preprocessing
+- **Sickle** - Quality-based trimming
+- **AdapterRemoval** - Adapter trimming
+
+### Assembly
+
+Tools for genome and transcriptome assembly:
+
+- **SPAdes** - Genome assembler
+- **MEGAHIT** - Metagenome assembler
+- **Trinity** - Transcriptome assembler
+- **Unicycler** - Bacterial genome assembly
+- **Hifiasm** - HiFi assembly
+- **Canu** - Long read assembler
+
+### Annotation and analysis
+
+- **SnpEff** - Variant annotation
+- **VEP** - Variant Effect Predictor
+- **GFFRead** - GFF/GTF utilities
+- **BEDTools** - Genome arithmetic
+- **BCFtools** - Variant calling file manipulation
+- **VCFtools** - VCF file manipulation
+
+### Specialized tools
+
+- **Bismark** - Bisulfite sequencing alignment
+- **MACS2** - Peak calling for ChIP-seq
+- **Sambamba** - BAM file processing
+- **Samtools** - BAM/SAM utilities
+- **Tabix** - Indexing for tab-delimited files
+- **BGZip** - Block compression
+
+## Finding wrappers
+
+### By tool name
+
+Search for a specific tool:
+
+```bash
+# List all wrappers
+ls bio/
+
+# Search for a specific tool
+find bio/ -name "*toolname*"
+```
+
+### By category
+
+Wrappers are organized in directories by tool name. Browse the repository structure:
+
+```
+bio/
+├── bwa/
+├── fastqc/
+├── gatk/
+├── salmon/
+└── ...
+```
+
+## Using wrappers
+
+Reference wrappers in your Snakefile:
+
+```python
+rule example:
+    wrapper:
+        "master/bio/toolname"
+```
+
+<Note>
+Replace `toolname` with the actual tool name from the `bio/` directory.
+</Note>
+
+## Wrapper documentation
+
+Each wrapper includes:
+
+- **meta.yaml**: Metadata and parameter documentation
+- **wrapper.py**: Implementation code
+- **environment.yaml**: Conda dependencies
+- **test/**: Example usage
+
+<Card
+  title="Browse on GitHub"
+  icon="github"
+  href="https://github.com/snakemake/snakemake-wrappers/tree/master/bio"
+>
+  Explore all wrappers in the repository
+</Card>
+
+## Contributing new wrappers
+
+Don't see a wrapper for your favorite tool? Consider contributing!
+
+<Card
+  title="Create a wrapper"
+  icon="plus-circle"
+  href="/creating-wrappers"
+>
+  Learn how to create and submit new wrappers
+</Card>
+

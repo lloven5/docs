@@ -1,0 +1,285 @@
+---
+title: "Using Wrappers"
+description: "Comprehensive guide to using wrappers in your Snakemake workflows"
+---
+
+## Basic usage
+
+The simplest way to use a wrapper is to specify it in your rule:
+
+```python
+rule example:
+    input:
+        "input.txt",
+    output:
+        "output.txt",
+    wrapper:
+        "master/bio/toolname"
+```
+
+## Input and output handling
+
+### Single input/output
+
+For tools that take a single input and produce a single output:
+
+```python
+rule bwa_index:
+    input:
+        "reference.fa",
+    output:
+        "reference.fa.bwt",
+    wrapper:
+        "master/bio/bwa/index"
+```
+
+### Multiple inputs
+
+For tools that require multiple input files:
+
+```python
+rule bwa_mem:
+    input:
+        reads=["sample1.fq", "sample2.fq"],
+        index=["reference.fa.bwt", "reference.fa.ann", "reference.fa.pac"],
+    output:
+        "alignment.sam",
+    wrapper:
+        "master/bio/bwa/mem"
+```
+
+### Named outputs
+
+Many wrappers return multiple outputs. Use a dictionary to specify named outputs:
+
+```python
+rule fastqc:
+    input:
+        "reads/sample.fastq",
+    output:
+        html="qc/fastqc/sample.html",
+        zip="qc/fastqc/sample_fastqc.zip",
+    wrapper:
+        "master/bio/fastqc"
+```
+
+## Parameter configuration
+
+### Using params
+
+Most wrappers accept additional parameters through the `params` directive:
+
+```python
+rule fastqc:
+    input:
+        "reads/sample.fastq",
+    output:
+        html="qc/fastqc/sample.html",
+        zip="qc/fastqc/sample_fastqc.zip",
+    params:
+        extra="--quiet --noextract",
+        mem_overhead_factor=0.1,
+    wrapper:
+        "master/bio/fastqc"
+```
+
+<Note>
+Available parameters vary by wrapper. Check the wrapper's `meta.yaml` file or test examples for the full list of supported parameters.
+</Note>
+
+## Resource management
+
+### Threads
+
+Specify the number of threads:
+
+```python
+rule bwa_mem:
+    input:
+        reads="sample.fq",
+        index="reference.fa",
+    output:
+        "alignment.sam",
+    threads: 8
+    wrapper:
+        "master/bio/bwa/mem"
+```
+
+### Memory and other resources
+
+Use the `resources` directive to specify memory and other resource requirements:
+
+```python
+rule fastqc:
+    input:
+        "reads/sample.fastq",
+    output:
+        html="qc/fastqc/sample.html",
+        zip="qc/fastqc/sample_fastqc.zip",
+    resources:
+        mem_mb=2048,
+        runtime=30,
+    wrapper:
+        "master/bio/fastqc"
+```
+
+<Warning>
+Some wrappers may have minimum resource requirements. Check the wrapper documentation for details.
+</Warning>
+
+## Logging
+
+Capture tool output by specifying a log file:
+
+```python
+rule fastqc:
+    input:
+        "reads/sample.fastq",
+    output:
+        html="qc/fastqc/sample.html",
+        zip="qc/fastqc/sample_fastqc.zip",
+    log:
+        "logs/fastqc/sample.log",
+    wrapper:
+        "master/bio/fastqc"
+```
+
+## Conda environment management
+
+### Automatic environment creation
+
+When using `--use-conda`, Snakemake automatically creates conda environments based on the wrapper's `environment.yaml`:
+
+```bash
+snakemake --use-conda -j 4
+```
+
+### Using specific wrapper versions
+
+You can pin wrapper versions by using a specific branch or tag:
+
+```python
+rule fastqc:
+    # ... other rule directives ...
+    wrapper:
+        "v1.0.0/bio/fastqc"  # Use version 1.0.0
+```
+
+### Custom conda environments
+
+If you need to modify the environment, you can create a custom `environment.yaml` in your workflow directory and reference it:
+
+```python
+rule custom_tool:
+    # ... other rule directives ...
+    conda:
+        "envs/custom_environment.yaml"
+    wrapper:
+        "master/bio/toolname"
+```
+
+## Wildcards and pattern matching
+
+Wrappers work seamlessly with Snakemake wildcards:
+
+```python
+rule fastqc:
+    input:
+        "reads/{sample}.fastq",
+    output:
+        html="qc/fastqc/{sample}.html",
+        zip="qc/fastqc/{sample}_fastqc.zip",
+    log:
+        "logs/fastqc/{sample}.log",
+    wrapper:
+        "master/bio/fastqc"
+
+rule all:
+    input:
+        expand("qc/fastqc/{sample}.html", sample=["sample1", "sample2", "sample3"])
+```
+
+## Combining wrappers
+
+Chain multiple wrappers together in a workflow:
+
+```python
+rule trim_galore:
+    input:
+        "raw_reads/{sample}.fastq",
+    output:
+        "trimmed/{sample}_trimmed.fq",
+    wrapper:
+        "master/bio/trim_galore"
+
+rule fastqc:
+    input:
+        "trimmed/{sample}_trimmed.fq",
+    output:
+        html="qc/fastqc/{sample}.html",
+        zip="qc/fastqc/{sample}_fastqc.zip",
+    wrapper:
+        "master/bio/fastqc"
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Wrapper not found">
+    **Problem**: Snakemake can't find the wrapper.
+    
+    **Solution**: 
+    - Ensure you're using the correct wrapper path format: `master/bio/toolname`
+    - Check that the tool exists in the repository
+    - Verify your internet connection (wrappers are downloaded on-the-fly)
+  </Accordion>
+  
+  <Accordion title="Conda environment creation fails">
+    **Problem**: Conda environment creation fails.
+    
+    **Solution**:
+    - Check that conda is properly installed and configured
+    - Try clearing conda cache: `conda clean --all`
+    - Verify the wrapper's `environment.yaml` is valid
+    - Check conda channel availability
+  </Accordion>
+  
+  <Accordion title="Output files not found">
+    **Problem**: Tool runs but output files are missing.
+    
+    **Solution**:
+    - Verify output file names match the wrapper's expected format
+    - Check the wrapper's `meta.yaml` for correct output specifications
+    - Review the log file for error messages
+    - Ensure the wrapper handles your input file format correctly
+  </Accordion>
+  
+  <Accordion title="Parameter not recognized">
+    **Problem**: Tool reports an unknown parameter.
+    
+    **Solution**:
+    - Check the wrapper's `meta.yaml` for supported parameters
+    - Review the wrapper's `wrapper.py` to see how parameters are passed
+    - Look at test examples in the wrapper's `test/` directory
+    - Verify parameter names match the tool's documentation
+  </Accordion>
+</AccordionGroup>
+
+## Best practices
+
+<Tip>
+**Use named outputs**: Always use named outputs when available to make your workflows more readable and maintainable.
+</Tip>
+
+<Tip>
+**Specify resources**: Always specify appropriate `threads` and `resources` to help Snakemake optimize job scheduling.
+</Tip>
+
+<Tip>
+**Use log files**: Always capture logs to help with debugging and compliance.
+</Tip>
+
+<Tip>
+**Version your wrappers**: Pin wrapper versions in production workflows to ensure reproducibility.
+</Tip>
+
